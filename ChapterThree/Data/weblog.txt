@@ -1,0 +1,5 @@
+12/10/2010,192.168.1.1,jsmith,http://www.google.com,200
+12/10/2010,192.168.1.4,jdoe,http://www.stjohns.edu,200
+12/10/2010,192.168.1.4,jdoe,http://www.stjohns.edu/academics,200
+12/10/2010,192.168.1.10,nknow,http://www.nyt.com,200
+12/10/2010,192.168.1.10,nknow,http://www.nyt.com/health,200
