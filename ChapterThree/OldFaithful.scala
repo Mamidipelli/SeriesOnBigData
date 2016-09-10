@@ -16,5 +16,12 @@ object OldFaithful {
     val sc = new SparkContext(conf)
     val dataset = sc.textFile("C:\\Spark\\data\\03-IntroductionToSpark\\OldFaithfulGeyserDataset.csv").map(line=>line.split(",")).map(elem=>(elem(0).toFloat,elem(1).toFloat))
     dataset.top(2).foreach (println)
+
+    case class EruptionItem (duration:Float, waiting:Float)
+    val dataset2 = sc.textFile("C:\\Spark\\data\\03-IntroductionToSpark\\OldFaithfulGeyserDataset.csv")
+      .map(line=>line.split(","))
+      .map(elem=>EruptionItem(elem(0).toFloat,elem(1).toFloat))
+
+    dataset2.take(5).foreach(e=>print(e.duration))
   }
 }
