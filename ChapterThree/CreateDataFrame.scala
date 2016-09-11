@@ -29,6 +29,10 @@ object CreateDataFrame {
 
     df.printSchema()
 
+    val franceDF = df.select("InvoiceNum","Desc","Qty","Country").where(df("Country") === "France")
+    franceDF.show(5)
 
+    df.registerTempTable("Invoices")
+    df.sqlContext.sql("SELECT COUNT(*) as total FROM Invoices WHERE Country='France'").show()
   }
 }
