@@ -1,18 +1,19 @@
 package Ch04
 
-import org.apache.spark.sql.functions._
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.functions._
+import org.apache.spark.util.StatCounter
 
 /**
   * Created by Giancarlo on 6/22/2016.
   */
 object MissingValue_Mean {
-
   //Defines numerical types and SummaryClass
   val nTypes = Set("Float","Int","Double")
 
-  class SummaryStat (m:Double, s:Double, mx:Float, mn:Float) extends Serializable {
+  class SummaryStat (m:Double, s:Double, mx:Double, mn:Double) extends Serializable {
     val AVG:Double = m
     val SD:Double = s
     val MAX:Double = mx
@@ -48,7 +49,7 @@ object MissingValue_Mean {
     }
     result
   }
-  
+
   def replaceWithMean(df: DataFrame, columns: Array[String], types: Array[String]): DataFrame = {
     val sStats = extractStat(df, columns, types)
     var result = df
@@ -60,11 +61,11 @@ object MissingValue_Mean {
     result
   }
 
-  def main(args: Array[String]) {
+  def main(args:Array[String]){
     val conf = new SparkConf()
       .setMaster("local[2]")
       .setAppName("Data Preprocessing")
-      .set("spark.executor.memory", "2g")
+      .set("spark.executor.memory","2g")
 
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
@@ -73,18 +74,22 @@ object MissingValue_Mean {
     val df = sqlContext.read.format("com.databricks.spark.csv").option("header", "true").load("c:/Spark/data/04-DataPreprocessing/01_Abalone - Missing.csv")
 
     // Convert the schema to the appropriate types
-    val columns = Array("Sex", "Length", "Diameter", "Height", "WholeWeight", "ShuckedWeight", "Vweight", "ShellWeight", "Rings")
-    val types = Array("String", "Float", "Float", "Float", "Float", "Float", "Float", "Float", "int")
-    val dataset = setTypes(df, columns, types)
+    val columns = Array("Sex","Length","Diameter","Height","WholeWeight","ShuckedWeight","Vweight","ShellWeight","Rings")
+    val types = Array("String","Float","Float","Float","Float","Float","Float","Float","int")
+    val dataset = setTypes(df,columns,types)
 
-    val dsClean = replaceWithMean(dataset,columns,types)
 
     // Dropping records with missing values
-    val countBefore = dsClean.count()
-    val tmpDS = dsClean.na.drop()
-    val countAfter = tmpDS.count()
+    val countBefore = dataset.count()
+    val cleanDataset = dataset.na.drop()
+    val countAfter = cleanDataset.count()
 
     println("Removed #"+(countBefore-countAfter)+ " records.")
+
+    // Replace Missing values with Mean
+    dataset.describe().show()
+    val dfMean = replaceWithMean(dataset, columns,types)
+    dfMean.describe().show()
   }
 
 }
